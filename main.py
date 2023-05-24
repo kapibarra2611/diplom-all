@@ -9,6 +9,8 @@ import database as db
 from config import USER_TOKEN, GROUP_TOKEN, GROUP_ID
 
 
+
+
 class VkUser:
     """Класс, использующий токен пользователя, для получения информации при помощи VK API."""
 
@@ -60,7 +62,7 @@ class VkUser:
             else:
                 for city_id in response:
                     city = city_id['id']
-        except:
+        except requests.exceptions.RequestException:
             print(f"Не удалось получить город пользователя для {user_id}: {response.json()['error']['error_msg']}")
             VkBot().write_msg(user_id, 'Ошибка с нашей стороны. Попробуйте позже.')
             # db.update(user_id, db.UserPosition, position=1, offset=0)
@@ -89,7 +91,7 @@ class VkUser:
                 photos.append(f'''photo{partner_id}_{photo_id['id']}''')
             top_photos = ','.join(photos[:3])
             return top_photos
-        except:
+        except requests.exceptions.RequestException:
             print(f"Не удалось получить список фотографий для {user_id}: {response.json()['error']['error_msg']}")
             VkBot().write_msg(user_id, 'Ошибка с нашей стороны. Попробуйте позже.')
 
@@ -153,11 +155,10 @@ class VkBot:
         :type attachment: str
         :param kwargs: Объекты, описывающие специальные сообщения. Например, клавиатуру.
         """
-        try:
-            vk.method('messages.send', {'user_id': user_id, 'message': message, 'random_id': randrange(10 ** 7),
-                                        'attachment': attachment, **kwargs})
-        except Exception as e:
-            print(e)
+
+        vk.method('messages.send', {'user_id': user_id, 'message': message, 'random_id': randrange(10 ** 7),
+                                    'attachment': attachment, **kwargs})
+
 
     def chat_keyboard(self, buttons, button_colors):
         """Метод создания новой клавиатуры для бота.
